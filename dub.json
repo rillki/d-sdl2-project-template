@@ -1,0 +1,19 @@
+{
+	"authors": [
+		"rillki"
+	],
+	"copyright": "Copyright © 2022, rillki",
+	"dependencies": {
+		"bindbc-sdl": "~>1.2.1"
+	},
+	"description": "D and SDL2 project template with DUB",
+	"license": "MIT",
+	"name": "d-sdl2-project-template",
+	"targetPath": "bin",
+	"versions": [
+		"SDL_2020",
+		"SDL_Image",
+		"SDL_TTF",
+		"SDL_Mixer"
+	]
+}
