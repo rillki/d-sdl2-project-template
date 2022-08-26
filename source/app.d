@@ -16,11 +16,13 @@ enum black = tuple(0, 0, 0, 255);
 
 void main()
 {   
+    // load and initialize SDL2 libraries
     if(!initSDL_libs())
     {
         writefln("Unable to initialize SDL libraries!");
         return;
     }
+    scope(exit) { quitSDL_libs(); }
     
     // create window and renderer
     enum windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN;
@@ -81,7 +83,7 @@ void main()
 }
 
 /++ 
-Dynamically loads and initializes SDL2, SDL_Image, SDL_TTF, SDL_Mixer libraries
+Dynamically loads and initializes SDL, SDL_Image, SDL_TTF, SDL_Mixer and SDL_Net libraries
 
 Returns: `true` upon sucess
 +/
@@ -100,7 +102,6 @@ bool initSDL_libs()
         writefln("Unable to initialize SDL2!");
         return false;
     }
-    scope(exit) { SDL_Quit(); }
     
     // initialize SDL_Image
     enum imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
@@ -109,7 +110,6 @@ bool initSDL_libs()
         writefln("Unable to initialize SDL_Image!");
         return false;
     }
-    scope(exit) { IMG_Quit(); }
 
     // initialize SDL_TTF
     if(TTF_Init() != 0)
@@ -117,7 +117,6 @@ bool initSDL_libs()
         writefln("Unable to initialize SDL_TTF!");
         return false;
     }
-    scope(exit) { TTF_Quit(); }
 
     // initialize SDL_Mixer
     enum mixerFlags = MIX_INIT_OGG | MIX_INIT_MP3;
@@ -126,7 +125,6 @@ bool initSDL_libs()
         writefln("Unable to initialize SDL_Mixer!");
         return false;
     }
-    scope(exit) { Mix_Quit(); }
     
     // initialize SDL_Net
     if(SDLNet_Init() != 0)
@@ -138,8 +136,18 @@ bool initSDL_libs()
     return true;
 }
 
+/// Quit all SDL libraries
+void quitSDL_libs()
+{
+    SDL_Quit();
+    IMG_Quit();
+    Mix_Quit();
+    TTF_Quit();
+    SDLNet_Quit();
+}
+
 /++
-Dynamically loads SDL2, SDL_Image, SDL_TTF, SDL_Mixer libraries
+Dynamically loads SDL, SDL_Image, SDL_TTF, SDL_Mixer and SDL_Net libraries
 
 Returns: `true` upon success
 +/
