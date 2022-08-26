@@ -16,14 +16,14 @@ Check out the `dub.json/dub.sdl` and `source/app.d` files for more info.
 * [DUB](https://dub.pm/) package manager
 
 ### Dependencies
-D uses the [bindbc-sdl](https://github.com/BindBC/bindbc-sdl) package. It is handled by DUB automatically. Please, make sure you have installed libraries mentioned above. If you don't need all of them, then remove those parts the project's code.
+D uses the [bindbc-sdl](https://github.com/BindBC/bindbc-sdl) package. It is handled by DUB automatically. Please, make sure you have installed the libraries mentioned above. If you don't need all of them, then remove those parts from the code.
 
 Modify your config file:
 ```
 // dub.json
 "dependencies": {
 		"bindbc-sdl": "~>1.2.1"
-	},
+},
 "versions": ["SDL_2020", "SDL_Image", "SDL_TTF", "SDL_Mixer", "SDL_Net"]
 ```
 ```
