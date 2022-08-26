@@ -6,8 +6,8 @@ import std.string: toStringz;
 import std.typecons: tuple;
 
 // constants
-enum wWidth = 800;
-enum wHeight = 600;
+enum wWidth = 720;
+enum wHeight = 405;
 enum wTitle = "D/SDL2 project";
 
 // colors
@@ -34,6 +34,8 @@ void main()
         return;
     }
     SDL_SetWindowTitle(windowID, wTitle.toStringz);
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     // close and destroy the window and the renderer
     scope(exit) 
@@ -47,6 +49,24 @@ void main()
     SDL_GetVersion(&v);
     writefln("Loaded SDL version: %s.%s.%s", v.major, v.minor, v.patch);
     
+    // Load texture
+    SDL_Texture* texture = null;
+    SDL_Surface* tmpSurface = IMG_Load("./imgs/dsdl.jpg".toStringz);
+    if(tmpSurface is null) 
+    {
+        writefln("Failed to load the image!");
+    }
+    else
+    {
+        texture = SDL_CreateTextureFromSurface(rendererID, tmpSurface);
+        if(texture is null)
+        {
+            writefln("Failed to create texture from surface!");   
+        }
+        SDL_FreeSurface(tmpSurface);
+    }
+    scope(exit) { SDL_DestroyTexture(texture); }
+
     bool quit = false;
     while(!quit) 
     {
@@ -76,7 +96,10 @@ void main()
         SDL_RenderClear(rendererID);
         {
             // draw
-            // ...
+            if(texture !is null)
+            {
+                SDL_RenderCopy(rendererID, texture, null, null);
+            }
         }
         SDL_RenderPresent(rendererID);
     }
