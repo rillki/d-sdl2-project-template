@@ -2,6 +2,17 @@ module app;
 
 import bindbc.sdl;
 import std.stdio: writefln;
+import std.string: toStringz;
+import std.typecons: tuple;
+
+// constants
+enum wWidth = 800;
+enum wHeight = 600;
+enum wTitle = "D/SDL2 project";
+
+// colors
+enum white = tuple(255, 255, 255, 255);
+enum black = tuple(0, 0, 0, 255);
 
 void main()
 {   
@@ -12,16 +23,15 @@ void main()
     }
     
     // create window and renderer
-    //enum SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000;
     enum windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN;
     SDL_Window* windowID = null;
-    SDL_Renderer *rendererID = null;
-    if(SDL_CreateWindowAndRenderer(800, 600, windowFlags, &windowID, &rendererID) != 0) 
+    SDL_Renderer* rendererID = null;
+    if(SDL_CreateWindowAndRenderer(wWidth, wHeight, windowFlags, &windowID, &rendererID) != 0) 
     {
         writefln("Failed to create a new SDL window and renderer!");
         return;
     }
-    SDL_SetWindowTitle(windowID, "D/SDL2 project");
+    SDL_SetWindowTitle(windowID, wTitle.toStringz);
 
     // close and destroy the window and the renderer
     scope(exit) 
@@ -41,16 +51,26 @@ void main()
         // --- POLL EVENTS --- //
         SDL_Event event;
         SDL_PollEvent(&event);
-        if(event.type == SDL_QUIT)
+        switch(event.type)
         {
-            quit = true;
+            case SDL_QUIT:
+                quit = true;
+                break;
+            case SDL_KEYDOWN:
+                if(event.key.keysym.sym == SDLK_q || event.key.keysym.sym == SDLK_ESCAPE) 
+                {
+                    quit = true;
+                } 
+                break;
+            default:
+                break;
         }
 
         // --- UPDATE --- //
         // ...
 
         // --- RENDER --- //
-        SDL_SetRenderDrawColor(rendererID, 255, 255, 255, 255);
+        SDL_SetRenderDrawColor(rendererID, white.expand);
         SDL_RenderClear(rendererID);
         {
             // draw
@@ -108,6 +128,13 @@ bool initSDL_libs()
     }
     scope(exit) { Mix_Quit(); }
     
+    // initialize SDL_Net
+    if(SDLNet_Init() != 0)
+    {
+        writefln("Unable to initialize SDL_Net!");
+        return false;
+    }
+
     return true;
 }
 
@@ -130,7 +157,7 @@ bool loadSDL_libs()
     auto imgRet = loadSDLImage();
     if(imgRet != sdlImageSupport)
     {
-        writefln(imgRet == SDLImageSupport.noLibrary ? "No SDL_Image image library found!" : "A newer version of SDL_Image is needed. Please, upgrade!");
+        writefln(imgRet == SDLImageSupport.noLibrary ? "No SDL_Image library found!" : "A newer version of SDL_Image is needed. Please, upgrade!");
         return false;
     }
 
@@ -138,7 +165,7 @@ bool loadSDL_libs()
     auto ttfRet = loadSDLTTF();
     if(ttfRet != sdlTTFSupport)
     {
-        writefln(ttfRet == SDLTTFSupport.noLibrary ? "No SDL_TTF image library found!" : "A newer version of SDL_TTF is needed. Please, upgrade!");
+        writefln(ttfRet == SDLTTFSupport.noLibrary ? "No SDL_TTF library found!" : "A newer version of SDL_TTF is needed. Please, upgrade!");
         return false;
     }
 
@@ -146,7 +173,15 @@ bool loadSDL_libs()
     auto mixerRet = loadSDLMixer();
     if(mixerRet != sdlMixerSupport)
     {
-        writefln(mixerRet == SDLMixerSupport.noLibrary ? "No SDL_Mixer image library found!" : "A newer version of SDL_Mixer is needed. Please, upgrade!");
+        writefln(mixerRet == SDLMixerSupport.noLibrary ? "No SDL_Mixer library found!" : "A newer version of SDL_Mixer is needed. Please, upgrade!");
+        return false;
+    }
+
+    // load SDL_Net
+    auto netRet = loadSDLNet();
+    if(netRet != sdlNetSupport)
+    {
+        writefln(netRet == SDLNetSupport.noLibrary ? "No SDL_Net library found!" : "A newer version of SDL_Net is needed. Please, upgrade!");
         return false;
     }
 
