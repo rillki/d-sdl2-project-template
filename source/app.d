@@ -176,6 +176,12 @@ Returns: `true` upon success
 +/
 bool loadSDL_libs()
 {
+    // set default dll lookup path for Windows
+    version(Windows) { 
+        import bindbc.loader: setCustomLoaderSearchPath;
+        setCustomLoaderSearchPath("libs"); 
+    }
+    
     // load SDL2
     auto sdlRet = loadSDL();
     if(sdlRet != sdlSupport)
