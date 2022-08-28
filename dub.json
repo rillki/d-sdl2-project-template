@@ -11,7 +11,7 @@
     "name": "d-sdl2-project-template",
     "targetPath": "bin",
     "versions": [
-        "SDL_2020",
+        "SDL_2010",
         "SDL_Image",
         "SDL_TTF",
         "SDL_Mixer",
