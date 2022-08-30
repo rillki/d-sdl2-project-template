@@ -36,7 +36,7 @@ versions "SDL_2020" "SDL_Image" "SDL_TTF" "SDL_Mixer" "SDL_Net"
 ```
 dub --build=release
 ```
-`--build=release` is optional. It will compile and run the project.
+`--build=release` is optional. `dub` will compile and run the project.
 
 ### LICENSE
 All code is licensed under MIT.
