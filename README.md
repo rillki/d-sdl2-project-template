@@ -22,7 +22,7 @@ Modify your config file:
 ```
 // dub.json
 "dependencies": {
-		"bindbc-sdl": "~>1.2.1"
+    "bindbc-sdl": "~>1.2.1"
 },
 "versions": ["SDL_2020", "SDL_Image", "SDL_TTF", "SDL_Mixer", "SDL_Net"]
 ```
