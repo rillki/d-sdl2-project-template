@@ -15,17 +15,20 @@ enum white = tuple(255, 255, 255, 255);
 enum black = tuple(0, 0, 0, 255);
 
 void main()
-{   
+{
+    // create init flags:   img   mixer  net   ttf
+    auto init_flags = tuple(true, true, true, true);
+
     // load and initialize SDL2 libraries
-    if(!initSDL_libs())
+    if(!initSDL_libs(init_flags.expand))
     {
         writefln("Unable to initialize SDL libraries!");
         return;
     }
-    scope(exit) { quitSDL_libs(); }
+    scope(exit) { quitSDL_libs(init_flags.expand); }
     
     // create window and renderer
-    enum windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN;
+    enum windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
     SDL_Window* windowID = null;
     SDL_Renderer* rendererID = null;
     if(SDL_CreateWindowAndRenderer(wWidth, wHeight, windowFlags, &windowID, &rendererID) != 0) 
@@ -108,12 +111,23 @@ void main()
 /++ 
 Dynamically loads and initializes SDL, SDL_Image, SDL_TTF, SDL_Mixer and SDL_Net libraries
 
+Params:
+    img = load sdl image library
+    mixer = load sdl mixer library
+    net = load sdl net library
+    ttf = load sdl ttf library
+
 Returns: `true` upon sucess
 +/
-bool initSDL_libs()
+bool initSDL_libs(
+    const bool img = true,
+    const bool mixer = true,
+    const bool net = true,
+    const bool ttf = true,
+)
 {
     // load SDL2
-    if(!loadSDL_libs()) 
+    if(!loadSDL_libs(img, mixer, net, ttf)) 
     {
         writefln("Unable to load the SDL2 library!");
         return false;
@@ -128,14 +142,14 @@ bool initSDL_libs()
     
     // initialize SDL_Image
     enum imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-    if((IMG_Init(imgFlags) & imgFlags) != imgFlags) 
+    if(img && (IMG_Init(imgFlags) & imgFlags) != imgFlags) 
     {
         writefln("Unable to initialize SDL_Image!");
         return false;
     }
 
     // initialize SDL_TTF
-    if(TTF_Init() != 0)
+    if(ttf && TTF_Init() != 0)
     {
         writefln("Unable to initialize SDL_TTF!");
         return false;
@@ -143,14 +157,14 @@ bool initSDL_libs()
 
     // initialize SDL_Mixer
     enum mixerFlags = MIX_INIT_OGG | MIX_INIT_MP3;
-    if((Mix_Init(mixerFlags) & mixerFlags) != mixerFlags)
+    if(mixer && (Mix_Init(mixerFlags) & mixerFlags) != mixerFlags)
     {
         writefln("Unable to initialize SDL_Mixer!");
         return false;
     }
     
     // initialize SDL_Net
-    if(SDLNet_Init() != 0)
+    if(net && SDLNet_Init() != 0)
     {
         writefln("Unable to initialize SDL_Net!");
         return false;
@@ -160,21 +174,37 @@ bool initSDL_libs()
 }
 
 /// Quit all SDL libraries
-void quitSDL_libs()
+void quitSDL_libs(
+    const bool img = true,
+    const bool mixer = true,
+    const bool net = true,
+    const bool ttf = true,
+)
 {
     SDL_Quit();
-    IMG_Quit();
-    Mix_Quit();
-    TTF_Quit();
-    SDLNet_Quit();
+    if (img) IMG_Quit();
+    if (mixer) Mix_Quit();
+    if (ttf) TTF_Quit();
+    if (net) SDLNet_Quit();
 }
 
 /++
 Dynamically loads SDL, SDL_Image, SDL_TTF, SDL_Mixer and SDL_Net libraries
 
+Params:
+    img = load sdl image library
+    mixer = load sdl mixer library
+    net = load sdl net library
+    ttf = load sdl ttf library
+
 Returns: `true` upon success
 +/
-bool loadSDL_libs()
+bool loadSDL_libs(
+    const bool img = true,
+    const bool mixer = true,
+    const bool net = true,
+    const bool ttf = true,
+)
 {
     // set default dll lookup path for Windows
     version(Windows) { 
@@ -191,35 +221,49 @@ bool loadSDL_libs()
     }
     
     // load SDL_Image
-    auto imgRet = loadSDLImage();
-    if(imgRet != sdlImageSupport)
+    if (img)
     {
-        writefln(imgRet == SDLImageSupport.noLibrary ? "No SDL_Image library found!" : "A newer version of SDL_Image is needed. Please, upgrade!");
-        return false;
+        auto imgRet = loadSDLImage();
+        if(imgRet != sdlImageSupport)
+        {
+            writefln(imgRet == SDLImageSupport.noLibrary ? "No SDL_Image library found!" : "A newer version of SDL_Image is needed. Please, upgrade!");
+            return false;
+        }
     }
+    
 
     // load SDL_TTF
-    auto ttfRet = loadSDLTTF();
-    if(ttfRet != sdlTTFSupport)
+    if (ttf)
     {
-        writefln(ttfRet == SDLTTFSupport.noLibrary ? "No SDL_TTF library found!" : "A newer version of SDL_TTF is needed. Please, upgrade!");
-        return false;
+        auto ttfRet = loadSDLTTF();
+        if(ttfRet != sdlTTFSupport)
+        {
+            writefln(ttfRet == SDLTTFSupport.noLibrary ? "No SDL_TTF library found!" : "A newer version of SDL_TTF is needed. Please, upgrade!");
+            return false;
+        }
     }
+    
 
-     // load SDL_Mixer
-    auto mixerRet = loadSDLMixer();
-    if(mixerRet != sdlMixerSupport)
+    // load SDL_Mixer
+    if (mixer) 
     {
-        writefln(mixerRet == SDLMixerSupport.noLibrary ? "No SDL_Mixer library found!" : "A newer version of SDL_Mixer is needed. Please, upgrade!");
-        return false;
+        auto mixerRet = loadSDLMixer();
+        if(mixerRet != sdlMixerSupport)
+        {
+            writefln(mixerRet == SDLMixerSupport.noLibrary ? "No SDL_Mixer library found!" : "A newer version of SDL_Mixer is needed. Please, upgrade!");
+            return false;
+        }
     }
 
     // load SDL_Net
-    auto netRet = loadSDLNet();
-    if(netRet != sdlNetSupport)
+    if (net)
     {
-        writefln(netRet == SDLNetSupport.noLibrary ? "No SDL_Net library found!" : "A newer version of SDL_Net is needed. Please, upgrade!");
-        return false;
+        auto netRet = loadSDLNet();
+        if(netRet != sdlNetSupport)
+        {
+            writefln(netRet == SDLNetSupport.noLibrary ? "No SDL_Net library found!" : "A newer version of SDL_Net is needed. Please, upgrade!");
+            return false;
+        }
     }
 
     return true;    
